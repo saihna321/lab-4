@@ -8,10 +8,11 @@ export default function Home() {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // Fetch users from localStorage
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    setUsers(storedUsers);
+    fetch('http://localhost:5000/api/users')
+      .then(res => res.json())
+      .then(data => setUsers(data.users));
   }, []);
+  
 
   return (
     <div>

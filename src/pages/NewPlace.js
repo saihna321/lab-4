@@ -13,30 +13,36 @@ const NewPlace = () => {
   const [longitude, setLongitude] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
 
-  const submitHandler = (event) => {
-    event.preventDefault();
-
-    const newPlace = {
-      id: Date.now().toString(), 
-      title,
-      description,
-      address,
-      location: { lat: latitude, lng: longitude },
-      photoUrl,
-      userId: user.id, 
-    };
+  const submitHandler = async (e) => {
+    e.preventDefault();
   
-    const storedPlaces = JSON.parse(localStorage.getItem("places")) || [];
+    try {
+      const response = await fetch('http://localhost:5000/api/places', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description,
+          address,
+          location: { latitude, longitude },
+          photoUrl,
+          creatorId: user?.id 
+        })
+      });
   
-    const updatedPlaces = [...storedPlaces, newPlace];
+      if (!response.ok) {
+        throw new Error('Failed to add place');
+      }
   
-    localStorage.setItem("places", JSON.stringify(updatedPlaces));
-  
-    console.log("Nemegdsen gazar:", newPlace);
-  
-    navigate(`/${user?.id}/places`);
+      const data = await response.json();
+      console.log("Place added:", data.place);
+      navigate(`/${user?.id}/places`);
+    } catch (error) {
+      console.error("Error adding place:", error);
+    }
   };
   
+
 
   return (
     <div className="add-place-container">

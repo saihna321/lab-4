@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/auth-hook"; 
 import '../styles/UserPlaces.css';
 
@@ -10,9 +10,12 @@ const UserPlaces = () => {
   const [userPlaces, setUserPlaces] = useState([]);
 
   useEffect(() => {
-    const storedPlaces = JSON.parse(localStorage.getItem("places")) || [];
-    const filtered = storedPlaces.filter((place) => place.userId === uid);
-    setUserPlaces(filtered);
+    fetch(`http://localhost:5000/api/places/user/${uid}`)
+      .then((res) => res.json())
+      .then((data) => setUserPlaces(data.places))
+      .catch((error) => {
+        console.error("Error fetching user places:", error);
+      });
   }, [uid]);
 
   if (loading) return <p className="loading-message">Түр хүлээнэ үү...</p>;

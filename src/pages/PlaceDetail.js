@@ -14,48 +14,43 @@ const PlaceDetail = () => {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
+  // Fetch place data from backend
   useEffect(() => {
-    const storedPlaces = JSON.parse(localStorage.getItem("places")) || [];
-    const foundPlace = storedPlaces.find((p) => p.id === placeId);
-    if (foundPlace) {
-      setPlace(foundPlace);
-      setTitle(foundPlace.title);
-      setDescription(foundPlace.description);
-      setAddress(foundPlace.address);
-      setPhotoUrl(foundPlace.photoUrl);
-      setLatitude(foundPlace.location.lat);
-      setLongitude(foundPlace.location.lng);
-    }
+    fetch(`http://localhost:5000/api/places/${placeId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPlace(data.place);
+        setTitle(data.place.title);
+        setDescription(data.place.description);
+        setAddress(data.place.address);
+        setPhotoUrl(data.place.photoUrl);
+        setLatitude(data.place.location.lat);
+        setLongitude(data.place.location.lng);
+      })
+      .catch((err) => console.error("Error fetching place data:", err));
   }, [placeId]);
 
   if (!place) {
     return <p className="loading-message">Түр хүлээнэ үү...</p>;
   }
 
-  const handleSave = () => {
-    const storedPlaces = JSON.parse(localStorage.getItem("places")) || [];
-    const updatedPlaces = storedPlaces.map((p) =>
-      p.id === placeId
-        ? {
-            ...p,
-            title,
-            description,
-            address,
-            photoUrl,
-            location: { lat: latitude, lng: longitude },
-          }
-        : p
-    );
-    localStorage.setItem("places", JSON.stringify(updatedPlaces));
-    setPlace({
-      ...place,
-      title,
-      description,
-      address,
-      photoUrl,
-      location: { lat: latitude, lng: longitude },
+  // Update place data in backend
+  const updatePlace = async () => {
+    await fetch(`http://localhost:5000/api/places/${placeId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description, address, photoUrl, location: { lat: latitude, lng: longitude } })
     });
+    setPlace({ ...place, title, description, address, photoUrl, location: { lat: latitude, lng: longitude } });
     setIsEditing(false);
+  };
+
+  // Delete place from backend
+  const deletePlace = async () => {
+    await fetch(`http://localhost:5000/api/places/${placeId}`, {
+      method: 'DELETE',
+    });
+    navigate("/");
   };
 
   const handleCancel = () => {
@@ -66,13 +61,6 @@ const PlaceDetail = () => {
     setPhotoUrl(place.photoUrl);
     setLatitude(place.location.lat);
     setLongitude(place.location.lng);
-  };
-
-  const handleDelete = () => {
-    const storedPlaces = JSON.parse(localStorage.getItem("places")) || [];
-    const updatedPlaces = storedPlaces.filter((p) => p.id !== placeId);
-    localStorage.setItem("places", JSON.stringify(updatedPlaces));
-    navigate("/");
   };
 
   const handleBack = () => {
@@ -147,7 +135,7 @@ const PlaceDetail = () => {
               placeholder="Уртраг (Longitude)"
             />
             <div className="place-detail-actions">
-              <button className="save-button" onClick={handleSave}>
+              <button className="save-button" onClick={updatePlace}>
                 Хадгалах
               </button>
               <button className="cancel-button" onClick={handleCancel}>
@@ -165,7 +153,7 @@ const PlaceDetail = () => {
               <button className="edit-button" onClick={() => setIsEditing(true)}>
                 Засах
               </button>
-              <button className="delete-button" onClick={handleDelete}>
+              <button className="delete-button" onClick={deletePlace}>
                 Устгах
               </button>
             </div>

@@ -4,7 +4,6 @@ import Home from "./pages/Home";
 import UserPlaces from "./pages/UserPlaces";
 import Authenticate from "./pages/Authenticate";
 import NewPlace from "./pages/NewPlace";
-import EditPlace from "./pages/EditPlace";
 import { useAuth } from "./hooks/auth-hook";
 import './App.css';
 import PlaceDetail from "./pages/PlaceDetail";
@@ -27,7 +26,6 @@ const App = () => {
           path="/authenticate" 
           element={<Authenticate/>}/>
         <Route path="/places/new" element={user ? <NewPlace /> : <Navigate to="/authenticate" />} />
-        <Route path="/places/:pid" element={user ? <EditPlace /> : <Navigate to="/authenticate" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
